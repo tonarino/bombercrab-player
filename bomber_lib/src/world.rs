@@ -37,7 +37,7 @@ pub enum Object {
     },
     /// An item that improves one of your abilities.
     PowerUp(PowerUp),
-    /// An explodable crate. Will stop the progress of bomb explosions,
+    /// An explodable crate. Will block bomb explosions,
     /// and it may contain powerups!
     Crate,
 }
@@ -79,15 +79,17 @@ impl PowerUp {
     }
 }
 
-/// Ticks measure game time. Players make one decision per tick.
+/// Ticks measure game time. Players make one decision per tick. A tick takes one second
+/// of real time.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Ticks(pub u32);
 
-/// Position relative to something (typically you),
+/// A position in the world relative to something (typically you),
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct TileOffset(pub i32, pub i32);
 
 impl Direction {
+    /// Convert a cardinal direction into an offset, by moving in that direction a number of times.
     pub fn extend<T: Into<i32>>(&self, amount: T) -> TileOffset {
         match self {
             Direction::West => TileOffset(-amount.into(), 0),
@@ -130,6 +132,7 @@ impl std::ops::Add for TileOffset {
         Self(self.0 + rhs.0, self.1 + rhs.1)
     }
 }
+
 impl std::ops::Sub for TileOffset {
     type Output = Self;
 
@@ -138,7 +141,8 @@ impl std::ops::Sub for TileOffset {
     }
 }
 
-/// Quality of life conversion.
+/// Quality of life conversion. Fallibly converts
+/// purely orthogonal offsets into their directions.
 impl TryFrom<TileOffset> for Direction {
     type Error = ();
 

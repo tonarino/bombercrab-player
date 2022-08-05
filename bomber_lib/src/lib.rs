@@ -1,18 +1,17 @@
-pub mod world;
-
-use bomber_macro::wasm_wrap;
-#[cfg(not(target_family = "wasm"))]
-use wasmtime::AsContextMut;
-
-use world::{Direction, Enemy, Object, Tile, TileOffset};
-
-// Reexports for quality of life when using the wasm macros
+/// Used by the wasm export/import machinery
 #[cfg(not(target_family = "wasm"))]
 pub use anyhow;
 pub use bincode;
+use bomber_macro::wasm_wrap;
 pub use serde::{Deserialize, Serialize};
 #[cfg(not(target_family = "wasm"))]
 pub use wasmtime;
+#[cfg(not(target_family = "wasm"))]
+use wasmtime::AsContextMut;
+
+/// Useful definitions about the game world and the player's surroundings.
+pub mod world;
+use world::{Direction, Enemy, Object, Tile, TileOffset};
 
 #[wasm_wrap]
 pub trait Player: Default {

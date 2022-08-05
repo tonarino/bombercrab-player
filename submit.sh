@@ -6,7 +6,7 @@ set -o pipefail
 # Default values. Copy .env.example to .env and edit the values there to override.
 UPLOAD_SERVER_ADDRESS=${UPLOAD_SERVER_ADDRESS:-127.0.0.1:8765}
 API_KEY=${API_KEY:-abcdef}
-CRATE_NAME=${CRATE_NAME:-wanderer}
+CRATE_NAME=${CRATE_NAME:-player}
 
 if [ -r .env ]; then
     source .env
