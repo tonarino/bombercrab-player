@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+   "./bomber_lib",
+   "./bomber_macro",
+   "./player",
+]
