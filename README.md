@@ -4,9 +4,9 @@ Welcome to the 2022 Tokyo Game Hack bombercrab challenge!
 
 If you're based in Tokyo and planning to attend in person, please let us know in the 
 [Peatix event page](https://bombercrab-rust-game-hack.peatix.com/view) so we can get started
-on your pizza. If you'll instead be joining us remotely, send us a message so we can hand you an API key,
-and in either case keep an eye on our [twitch channel](https://www.twitch.tv/rust_bombercrab) the 12th of August
-at 7PM JST.
+on your pizza. If you'll instead be joining us remotely, send us a message using any channel
+you prefer so we can hand you an API key, and in either case keep an eye on our
+[twitch channel](https://www.twitch.tv/rust_bombercrab) the 12th of August at 7PM JST.
 
 # How to participate
 
@@ -15,6 +15,10 @@ upload your character as often as you like; you'd be queued so everyone has a fa
 to constantly improve your character's behaviour, even while a game is currently going on.
 
 # One time setup
+
+Install Rust toolchain for the `wasm32-unknown-unknown` target. If using https://rustup.rs/, run `rustup target add wasm32-unknown-unknown`.
+
+The `submit.sh` script also requires having the `curl` binary around.
 
 Copy `.env.example` to `.env` and edit the contents with the server IP address (which we'll provide when the event starts), 
 the API key (which we'll also provide) and the name of your player crate (you can leave this as `player` if you like).
