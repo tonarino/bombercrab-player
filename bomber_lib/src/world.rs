@@ -89,7 +89,7 @@ pub struct Ticks(pub u32);
 pub struct TileOffset(pub i32, pub i32);
 
 impl Direction {
-    /// convert a cardinal direction into an offset, by moving in that direction a number of times.
+    /// Convert a cardinal direction into an offset, by moving in that direction a number of times.
     pub fn extend<T: Into<i32>>(&self, amount: T) -> TileOffset {
         match self {
             Direction::West => TileOffset(-amount.into(), 0),
