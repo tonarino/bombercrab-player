@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use bomber_lib::{
     self,
@@ -39,6 +39,9 @@ impl Player for MatejBot {
             if matches!(tile.1, Some(Object::Bomb { .. } | Object::Crate)) {
                 return false;
             }
+            if matches!(&tile.2, Some(_enemy)) {
+                return false;
+            }
             true
         });
 
@@ -62,32 +65,53 @@ impl Player for MatejBot {
             allowed_directions.remove(&West);
         }
 
-        let mut preferred_directions: HashSet<Direction> = HashSet::new();
-        for &(_, _, _, offset) in surroundings.iter().filter(|&(tile, object, _, _)| {
-            tile == &Tile::Hill || matches!(object, Some(Object::PowerUp(_)))
-        }) {
+        let mut preferred_directions: HashMap<Direction, f32> =
+            Direction::all().into_iter().map(|d| (d, 0.0)).collect();
+        for &(tile, object, _, offset) in surroundings.iter() {
+            let mut score = 0.0;
+            if tile == Tile::Hill {
+                score += 100.0;
+            }
+            if matches!(object, Some(Object::PowerUp(_))) {
+                score += 10.0;
+            }
+            if matches!(object, Some(Object::Crate)) {
+                score += 1.0;
+            }
+            if score == 0.0 {
+                continue;
+            }
+            score /= offset.taxicab_distance() as f32;
+
             let TileOffset(x, y) = offset;
             if x > 0 {
-                preferred_directions.insert(East);
+                *preferred_directions.get_mut(&East).unwrap() += score;
             }
             if x < 0 {
-                preferred_directions.insert(West);
+                *preferred_directions.get_mut(&West).unwrap() += score;
             }
             if y > 0 {
-                preferred_directions.insert(North);
+                *preferred_directions.get_mut(&North).unwrap() += score;
             }
             if y < 0 {
-                preferred_directions.insert(South);
+                *preferred_directions.get_mut(&South).unwrap() += score;
             }
         }
 
-        let direction = if let Some(&direction) =
-            allowed_directions.intersection(&preferred_directions).next()
-        {
-            Some(direction)
-        } else {
-            allowed_directions.into_iter().next()
-        };
+        let mut preferred_directions: Vec<_> =
+            preferred_directions.into_iter().map(|(d, score)| (score, d)).collect();
+        preferred_directions.sort_by_key(|&(score, _)| (-score * 1_000_000.0) as i64);
+
+        let mut direction = None;
+        for (_, d) in preferred_directions.into_iter().filter(|&(s, _)| s > 0.0) {
+            if allowed_directions.contains(&d) {
+                direction = Some(d);
+                break;
+            }
+        }
+        if direction.is_none() {
+            direction = allowed_directions.into_iter().next()
+        }
 
         // Drops a bomb every once in a while.
         let drop_bomb = crate_or_player_close(&surroundings);
@@ -154,5 +178,11 @@ fn crate_or_player_close(
     surroundings
         .iter()
         .filter(|&(_, _, _, offset)| offset.is_orthogonally_adjacent())
-        .any(|(_, object, enemy, _)| matches!(object, Some(Object::Crate)) || enemy.is_some())
+        .any(|(_, object, _, _)| matches!(object, Some(Object::Crate)))
+        || surroundings
+            .iter()
+            .filter(|&(_, _, _, offset)| {
+                (offset.0 == 0 || offset.1 == 1) && offset.taxicab_distance() <= 2
+            })
+            .any(|(_, _, enemy, _)| enemy.is_some())
 }
