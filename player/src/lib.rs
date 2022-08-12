@@ -33,7 +33,7 @@ impl Player for MatejBot {
                 .find(|s| s.3 == direction.extend(1))
                 .expect("direction in surroundings");
 
-            if tile.0 != Tile::Floor {
+            if tile.0 == Tile::Wall {
                 return false;
             }
             if matches!(tile.1, Some(Object::Bomb { .. } | Object::Crate)) {
@@ -62,20 +62,32 @@ impl Player for MatejBot {
             allowed_directions.remove(&West);
         }
 
-        // for (_, object, _, TileOffset(x_offset, y_offset)) in surroundings.iter() {
-        //     if !matches!(object, Some(Object::Bomb { .. })) {
-        //         continue;
-        //     }
+        let mut preferred_directions: HashSet<Direction> = HashSet::new();
+        for &(_, _, _, offset) in surroundings.iter().filter(|&(tile, object, _, _)| {
+            tile == &Tile::Hill || matches!(object, Some(Object::PowerUp(_)))
+        }) {
+            let TileOffset(x, y) = offset;
+            if x > 0 {
+                preferred_directions.insert(East);
+            }
+            if x < 0 {
+                preferred_directions.insert(West);
+            }
+            if y > 0 {
+                preferred_directions.insert(North);
+            }
+            if y < 0 {
+                preferred_directions.insert(South);
+            }
+        }
 
-        //     match (*x_offset, *y_offset) {
-        //         (-1 | 0 | 1, y_offset) if y_offset >= 0 => allowed_directions.remove(&North),
-        //         (-1 | 0 | 1, y_offset) if y_offset < 0 => allowed_directions.remove(&South),
-        //         (x_offset, -1 | 0 | 1) if x_offset >= 0 => allowed_directions.remove(&East),
-        //         (x_offset, -1 | 0 | 1) if x_offset < 0 => allowed_directions.remove(&West),
-        //         // Nothing to do
-        //         (_, _) => false,
-        //     };
-        // }
+        let direction = if let Some(&direction) =
+            allowed_directions.intersection(&preferred_directions).next()
+        {
+            Some(direction)
+        } else {
+            allowed_directions.into_iter().next()
+        };
 
         // Drops a bomb every once in a while.
         let drop_bomb = crate_or_player_close(&surroundings);
@@ -87,7 +99,6 @@ impl Player for MatejBot {
         // Finalization
         self.ticks += 1;
 
-        let direction = allowed_directions.into_iter().next();
         match (drop_bomb, direction) {
             (true, Some(direction)) => Action::DropBombAndMove(direction),
             (true, None) => Action::DropBomb,
@@ -97,7 +108,7 @@ impl Player for MatejBot {
     }
 
     fn name(&self) -> String {
-        "MatBomber3".into()
+        "MatBomber".into()
     }
 
     fn team_name() -> String {
