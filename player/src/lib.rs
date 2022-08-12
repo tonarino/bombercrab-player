@@ -1,7 +1,7 @@
 use bomber_lib::{
     self,
-    world::{Enemy, Object, Tile},
-    Action, Player,
+    world::{Enemy, Object, Tile, Direction},
+    Action, Player, 
 };
 use bomber_macro::wasm_export;
 
@@ -15,14 +15,15 @@ impl Player for MyPlayer {
         &mut self,
         _surroundings: Vec<(Tile, Option<Object>, Option<Enemy>, bomber_lib::world::TileOffset)>,
     ) -> Action {
-        todo!("Observe your surroundings and return an Action to do this turn")
+        // TODO - Observe your surroundings and return an Action to do this turn
+        Action::Move(Direction::West)
     }
 
     fn name(&self) -> String {
-        todo!("Return your name within the 10 character limit")
+        "noob".to_owned()
     }
 
     fn team_name() -> String {
-        todo!("Return your team name within the 20 character limit")
+        "noob team".to_owned()
     }
 }
