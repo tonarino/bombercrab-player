@@ -48,6 +48,7 @@ impl Player for MatejBot {
         // Remove bomb directions
         allowed_directions.retain(|direction| !bomb_in_direction(*direction, &surroundings));
 
+        // TODO: more precise and less repetitive formula, also don't run into bombs one-tile offset but further away.
         if bomb_at_offset(1, 1, &surroundings) {
             allowed_directions.remove(&North);
             allowed_directions.remove(&East);
@@ -68,6 +69,7 @@ impl Player for MatejBot {
         let mut preferred_directions: HashMap<Direction, f32> =
             Direction::all().into_iter().map(|d| (d, 0.0)).collect();
         for &(tile, object, _, offset) in surroundings.iter() {
+            // TODO: only add bonus for actually reachable (path exists) tiles.
             let mut score = 0.0;
             if tile == Tile::Hill {
                 score += 100.0;
@@ -144,6 +146,7 @@ fn bomb_in_direction(
     direction: Direction,
     surroundings: &[(Tile, Option<Object>, Option<Enemy>, bomber_lib::world::TileOffset)],
 ) -> bool {
+    // TODO: only count bombs that are not behind walls, count their range..
     for &(_, object, _, offset) in surroundings.iter() {
         if !matches!(object, Some(Object::Bomb { .. })) {
             continue;
